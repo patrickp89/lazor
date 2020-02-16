@@ -1,2 +1,2 @@
 # lazor
-A ray tracer for WebAssembly
+A ray tracer for WebAssembly.
