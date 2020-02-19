@@ -1,7 +1,10 @@
 mod ray_tracer;
 mod utils;
+mod vector_arithmetic;
 
 use crate::ray_tracer::*;
+use crate::vector_arithmetic::*;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::console;
@@ -19,9 +22,9 @@ pub fn render_scene() {
     // all spheres that should be drawn:
     let sphere1 = Sphere {
         pos: Vector3 {
-            x: -50,
-            y: -40,
-            z: 250,
+            x: -50.0,
+            y: -40.0,
+            z: 250.0,
         },
         r: 25,
         color: Color { r: 255, g: 0, b: 0 },
@@ -29,9 +32,9 @@ pub fn render_scene() {
     };
     let sphere2 = Sphere {
         pos: Vector3 {
-            x: -50,
-            y: -40,
-            z: 250,
+            x: -50.0,
+            y: -40.0,
+            z: 250.0,
         },
         r: 25,
         color: Color { r: 255, g: 0, b: 0 },
@@ -41,13 +44,21 @@ pub fn render_scene() {
 
     // ...and all the planes:
     let plane1 = Plane {
-        n: Vector3 { x: 0, y: -1, z: 0 },
+        n: Vector3 {
+            x: 0.0,
+            y: -1.0,
+            z: 0.0,
+        },
         d: 25,
         color: Color { r: 255, g: 0, b: 0 },
         reflect: true,
     };
     let plane2 = Plane {
-        n: Vector3 { x: 0, y: -1, z: 0 },
+        n: Vector3 {
+            x: 0.0,
+            y: -1.0,
+            z: 0.0,
+        },
         d: 25,
         color: Color { r: 255, g: 0, b: 0 },
         reflect: true,
@@ -57,9 +68,9 @@ pub fn render_scene() {
     // a light source:
     let light1 = Light {
         pos: Vector3 {
-            x: -50,
-            y: -40,
-            z: 250,
+            x: -50.0,
+            y: -40.0,
+            z: 250.0,
         },
     };
 
@@ -72,9 +83,9 @@ pub fn render_scene() {
         .map_err(|_| ())
         .unwrap();
 
+    // trace the scene:
     console::log_1(&"Okay, done. Calling ray_tracer::render()...".into());
-
-    // trace 'em:
     ray_tracer::render(&spheres, &planes, &light1, &canvas);
+
     console::log_1(&"Done!".into());
 }
