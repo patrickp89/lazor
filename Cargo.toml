@@ -36,6 +36,7 @@ features = [
   'HtmlCanvasElement',
   'Window',
   'console',
+  'ImageData',
 ]
 
 [dev-dependencies]

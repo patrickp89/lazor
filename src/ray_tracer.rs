@@ -173,11 +173,12 @@ pub struct Sphere {
 
 pub struct Plane {
     pub n: Vector3,
-    pub d: i64,
+    pub d: f64,
     pub color: Color,
     pub reflect: bool,
 }
 
+#[derive(Copy, Clone)]
 pub struct Color {
     pub r: i64,
     pub g: i64,

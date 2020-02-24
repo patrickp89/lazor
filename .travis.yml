@@ -15,5 +15,6 @@ matrix:
       - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
     script:
       - cargo check
+      - cargo test
       - wasm-pack build
 #      - wasm-pack test --chrome --firefox --headless
