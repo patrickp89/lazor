@@ -1,4 +1,6 @@
 # lazor
+[![Build Status](https://travis-ci.org/patrickp89/lazor.svg?branch=master)](https://travis-ci.org/patrickp89/lazor)
+
 A (naive) ray tracer for WebAssembly. Most of the code was stolen from [jsoendermann/ljsp](https://github.com/jsoendermann/ljsp).
 
 # Setup
