@@ -60,28 +60,77 @@ fn render_with_data_array(
 
     for y in 0..height {
         for x in 0..width {
-            let normalized_x: f64 = ((x / width) as f64) - 0.5;
-            let normalized_y: f64 = ((y / height) as f64) - 0.5;
-
-            let t1 = scale_vector(normalized_x, &camera_right);
-            let t2 = scale_vector(normalized_y, &camera_up);
-            let t3 = sum(&t1, &t2);
-
-            let ray_direction = sum(&t3, &camera_direction);
-            let r = Ray {
-                origin: Vector3 {
-                    x: 0.0,
-                    y: 0.0,
-                    z: 0.0,
-                },
-                direction: ray_direction,
-            };
-            let c = trace_ray(&r, 1, &scene.spheres, &scene.planes, &scene.light);
+            let c = compute_and_trace_ray(
+                x,
+                y,
+                width,
+                height,
+                &camera_direction,
+                &camera_up,
+                &camera_right,
+                &scene,
+            );
             set_pixel_color(&mut data, width, x, y, &c);
         }
     }
 
     return data;
+}
+
+fn compute_and_trace_ray(
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+    camera_direction: &Vector3,
+    camera_up: &Vector3,
+    camera_right: &Vector3,
+    scene: &Scene,
+) -> Color {
+    let r = compute_ray(
+        x,
+        y,
+        width,
+        height,
+        &camera_direction,
+        &camera_up,
+        &camera_right,
+    );
+    return trace_ray(&r, 1, &scene.spheres, &scene.planes, &scene.light);
+}
+
+fn compute_ray(
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+    camera_direction: &Vector3,
+    camera_up: &Vector3,
+    camera_right: &Vector3,
+) -> Ray {
+    let p = normalize_x_y(x, y, width, height);
+    let t1 = scale_vector(p.x, &camera_right);
+    let t2 = scale_vector(p.y, &camera_up);
+    let t3 = sum(&t1, &t2);
+
+    let ray_direction = sum(&t3, &camera_direction);
+    return Ray {
+        origin: Vector3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+        direction: ray_direction,
+    };
+}
+
+fn normalize_x_y(x: u32, y: u32, width: u32, height: u32) -> Point {
+    let normalized_x: f64 = ((x as f64) / (width as f64)) - 0.5;
+    let normalized_y: f64 = ((y as f64) / (height as f64)) - 0.5;
+    return Point {
+        x: normalized_x,
+        y: normalized_y,
+    };
 }
 
 fn trace_ray(r: &Ray, depth: u32, spheres: &[Sphere], planes: &[Plane], light: &Light) -> Color {
@@ -139,7 +188,6 @@ fn scale_color(a: f64, c: &Color) -> Color {
     let scaled_green = ((c.g as f64) * a).round() as u8;
     let scaled_blue = ((c.b as f64) * a).round() as u8;
 
-    // TODO: the min-max magic should be a function of its own!
     let red = cmp::min(cmp::max(scaled_red, 0), 255);
     let green = cmp::min(cmp::max(scaled_green, 0), 255);
     let blue = cmp::min(cmp::max(scaled_blue, 0), 255);
@@ -283,7 +331,7 @@ pub struct Plane {
     pub reflect: bool,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -300,7 +348,7 @@ pub struct Scene {
     pub light: Light,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Ray {
     pub origin: Vector3,
     pub direction: Vector3,
@@ -310,6 +358,11 @@ struct Intersection<'a> {
     pub k: f64,
     pub point: Vector3,
     pub geom_object: GeomPrimitive<'a>,
+}
+
+struct Point {
+    pub x: f64,
+    pub y: f64,
 }
 
 enum GeomPrimitive<'a> {
@@ -341,6 +394,198 @@ impl GeomPrimitive<'_> {
             GeomPrimitive::Plane(plane) => plane.color.clone(), // TODO: should work without the clone trait, see compute_normal()!
             GeomPrimitive::Sphere(sphere) => sphere.color.clone(), // TODO: should work without the clone trait, see compute_normal()!
             GeomPrimitive::EMPTY => panic!("Unknown geom. primitive!"), // TODO: get rid of EMPTY!
+        };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+    use std::fs;
+
+    // TODO: the camera direction should be part of the scene struct?
+    const TEST_CAMERA_DIRECTION: Vector3 = Vector3 {
+        x: 0.0,
+        y: 0.0,
+        z: 1.0,
+    };
+
+    const TEST_CAMERA_UP: Vector3 = Vector3 {
+        x: 0.0,
+        y: 1.0,
+        z: 0.0,
+    };
+
+    const ZERO_VECTOR3: Vector3 = Vector3 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
+
+    #[test]
+    fn test_normalize_x_y() {
+        let width = 12;
+        let height = 12;
+
+        let p1 = normalize_x_y(0, 0, width, height);
+        assert_eq!(p1.x, -0.5);
+        assert_eq!(p1.y, -0.5);
+
+        let p2 = normalize_x_y(6, 9, width, height);
+        assert_eq!(p2.x, 0.0);
+        assert_eq!(p2.y, 0.25);
+    }
+
+    #[test]
+    fn test_compute_ray() {
+        let camera_right = cross_product(&TEST_CAMERA_DIRECTION, &TEST_CAMERA_UP);
+        let width = 12;
+        let height = 12;
+
+        // a test scene:
+        let scene = create_small_test_scene();
+
+        // compute some rays:
+        let r1 = compute_ray(
+            0,
+            0,
+            width,
+            height,
+            &TEST_CAMERA_DIRECTION,
+            &TEST_CAMERA_UP,
+            &camera_right,
+        );
+        let er1 = Ray {
+            origin: ZERO_VECTOR3,
+            direction: Vector3 {
+                x: 0.5,
+                y: -0.5,
+                z: 1.0,
+            },
+        };
+        assert_eq!(r1, er1);
+
+        let r2 = compute_ray(
+            6,
+            9,
+            width,
+            height,
+            &TEST_CAMERA_DIRECTION,
+            &TEST_CAMERA_UP,
+            &camera_right,
+        );
+        let er2 = Ray {
+            origin: ZERO_VECTOR3,
+            direction: Vector3 {
+                x: 0.0,
+                y: 0.25,
+                z: 1.0,
+            },
+        };
+        assert_eq!(r2, er2);
+    }
+
+    #[test]
+    fn test_compute_and_trace_ray() {
+        let camera_right = cross_product(&TEST_CAMERA_DIRECTION, &TEST_CAMERA_UP);
+        let width = 12;
+        let height = 12;
+
+        // a test scene:
+        let scene = create_small_test_scene();
+
+        // trace some rays:
+        let c1 = compute_and_trace_ray(
+            0,
+            0,
+            width,
+            height,
+            &TEST_CAMERA_DIRECTION,
+            &TEST_CAMERA_UP,
+            &camera_right,
+            &scene,
+        );
+        assert_eq!(c1, Color { r: 0, g: 0, b: 0 });
+
+        let c2 = compute_and_trace_ray(
+            6,
+            9,
+            width,
+            height,
+            &TEST_CAMERA_DIRECTION,
+            &TEST_CAMERA_UP,
+            &camera_right,
+            &scene,
+        );
+        assert_eq!(
+            c2,
+            Color {
+                r: 148,
+                g: 148,
+                b: 148,
+            }
+        );
+
+        let c3 = compute_and_trace_ray(
+            11,
+            11,
+            width,
+            height,
+            &TEST_CAMERA_DIRECTION,
+            &TEST_CAMERA_UP,
+            &camera_right,
+            &scene,
+        );
+        assert_eq!(
+            c3,
+            Color {
+                r: 112,
+                g: 112,
+                b: 112,
+            }
+        );
+    }
+
+    fn create_small_test_scene() -> Scene {
+        let test_spheres = vec![Sphere {
+            pos: Vector3 {
+                x: -50.0,
+                y: -40.0,
+                z: 250.0,
+            },
+            r: 25.0,
+            color: Color { r: 255, g: 0, b: 0 },
+            reflect: true,
+        }];
+
+        let test_planes = vec![Plane {
+            n: Vector3 {
+                x: 0.0,
+                y: -1.0,
+                z: 0.0,
+            },
+            d: 60.0,
+            color: Color {
+                r: 200,
+                g: 200,
+                b: 200,
+            },
+            reflect: false,
+        }];
+
+        let light1 = Light {
+            pos: Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 180.0,
+            },
+        };
+
+        return Scene {
+            spheres: test_spheres,
+            planes: test_planes,
+            light: light1,
         };
     }
 }

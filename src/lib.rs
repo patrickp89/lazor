@@ -181,8 +181,8 @@ fn create_test_planes() -> Vec<Plane> {
     let plane6 = Plane {
         n: Vector3 {
             x: 0.0,
-            y: 1.0,
-            z: 0.0,
+            y: 0.0,
+            z: 1.0,
         },
         d: 5.0,
         color: light_grey,
