@@ -304,7 +304,7 @@ fn ray_plane_intersection_point(r: &Ray, plane: &Plane) -> f64 {
     return if d.abs() < TINY_VALUE {
         HUGE_VALUE
     } else {
-        ((-plane.d - dot_product(&r.origin, &plane.n)) / d)
+        (-plane.d - dot_product(&r.origin, &plane.n)) / d
     };
 }
 
@@ -401,8 +401,6 @@ impl GeomPrimitive<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
-    use std::fs;
 
     // TODO: the camera direction should be part of the scene struct?
     const TEST_CAMERA_DIRECTION: Vector3 = Vector3 {
@@ -442,9 +440,6 @@ mod tests {
         let camera_right = cross_product(&TEST_CAMERA_DIRECTION, &TEST_CAMERA_UP);
         let width = 12;
         let height = 12;
-
-        // a test scene:
-        let scene = create_small_test_scene();
 
         // compute some rays:
         let r1 = compute_ray(

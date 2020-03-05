@@ -31,9 +31,11 @@ pub fn render_scene() {
         .unwrap();
 
     console::log_1(&"Okay, done. Calling ray_tracer::render()...".into());
-    ray_tracer::render(&scene, &canvas);
-
-    console::log_1(&"Done!".into());
+    let image_data = ray_tracer::render(&scene, &canvas);
+    match image_data {
+        Ok(_) => console::log_1(&"Done!".into()),
+        Err(e) => console::log_2(&"An error occurred: ".into(), &e),
+    }
 }
 
 /// A test scene.
@@ -108,7 +110,7 @@ fn create_test_spheres() -> Vec<Sphere> {
             z: 200.0,
         },
         r: 30.0,
-        color: Color { r: 0, g: 0, b: 0 },
+        color: Color { r: 0, g: 255, b: 0 },
         reflect: true,
     };
 
