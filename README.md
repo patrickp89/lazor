@@ -3,7 +3,7 @@
 
 A (naive) ray tracer for WebAssembly. Most of the code was stolen from [jsoendermann/ljsp](https://github.com/jsoendermann/ljsp).
 
-# Setup
+## Setup
 Install Rust (e.g. via [Rustup](https://www.rust-lang.org/tools/install)),
 [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/), and [Node.js](https://nodejs.org/en/):
 ```bash
@@ -21,13 +21,13 @@ $ npm install wasm-opt -g
 
 > Installing wasm-opt globally fixes a current bug!
 
-# How to build it?
+## How to build it?
 Build the WebAssembly via wasm-pack:
 ```bash
 $ wasm-pack build
 ```
 
-# Render a test scene!
+## Render a test scene!
 Start the Node.js sever, visit [localhost:8080](http://localhost:8080/), and click the "Render!" button:
 ```bash
 $ cd www/
