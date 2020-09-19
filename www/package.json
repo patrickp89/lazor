@@ -20,15 +20,16 @@
   "license": "GNU GPL v3",
   "devDependencies": {
     "acorn": "^7.4.0",
-    "copy-webpack-plugin": "^5.0.0",
+    "copy-webpack-plugin": "^5.1.2",
     "hello-wasm-pack": "^0.1.0",
     "kind-of": ">=6.0.3",
     "minimist": ">=1.2.2",
-    "webpack": "^4.44.1",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "lazor": "file:../pkg"
+    "lazor": "file:../pkg",
+    "selfsigned": "^1.10.8"
   }
 }

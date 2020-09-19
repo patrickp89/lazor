@@ -1,6 +1,6 @@
 //! A naive ray tracer implementation.
 
-use crate::ray_tracer::GeomPrimitive::EMPTY;
+use crate::ray_tracer::GeomPrimitive::UNKNOWN;
 use crate::vector_arithmetic::*;
 use std::cmp;
 use wasm_bindgen::{Clamped, JsCast, JsValue};
@@ -230,7 +230,7 @@ fn closest_intersection_point<'b>(
     planes: &'b [Plane],
 ) -> Intersection<'b> {
     let mut smallest_k = HUGE_VALUE;
-    let mut closest_object: GeomPrimitive = EMPTY;
+    let mut closest_object: GeomPrimitive = UNKNOWN;
 
     // does the ray intersect a sphere?
     for sphere in spheres.iter() {
@@ -368,7 +368,7 @@ struct Point {
 enum GeomPrimitive<'a> {
     Plane(&'a Plane),
     Sphere(&'a Sphere),
-    EMPTY, // TODO: this is ugly... use a result instead!
+    UNKNOWN,
 }
 
 impl GeomPrimitive<'_> {
@@ -376,7 +376,7 @@ impl GeomPrimitive<'_> {
         let v: Vector3 = match self {
             GeomPrimitive::Plane(plane) => plane.n,
             GeomPrimitive::Sphere(sphere) => difference(&point, &sphere.pos),
-            GeomPrimitive::EMPTY => panic!("Unknown geom. primitive!"), // TODO: get rid of EMPTY!
+            GeomPrimitive::UNKNOWN => panic!("Unknown geom. primitive!"),
         };
         return normalize(&v);
     }
@@ -385,7 +385,7 @@ impl GeomPrimitive<'_> {
         return match self {
             GeomPrimitive::Plane(plane) => plane.reflect,
             GeomPrimitive::Sphere(sphere) => sphere.reflect,
-            GeomPrimitive::EMPTY => panic!("Unknown geom. primitive!"), // TODO: get rid of EMPTY!
+            GeomPrimitive::UNKNOWN => panic!("Unknown geom. primitive!"),
         };
     }
 
@@ -393,7 +393,7 @@ impl GeomPrimitive<'_> {
         return match self {
             GeomPrimitive::Plane(plane) => plane.color.clone(), // TODO: should work without the clone trait, see compute_normal()!
             GeomPrimitive::Sphere(sphere) => sphere.color.clone(), // TODO: should work without the clone trait, see compute_normal()!
-            GeomPrimitive::EMPTY => panic!("Unknown geom. primitive!"), // TODO: get rid of EMPTY!
+            GeomPrimitive::UNKNOWN => panic!("Unknown geom. primitive!"),
         };
     }
 }
