@@ -24,6 +24,7 @@
     "hello-wasm-pack": "^0.1.0",
     "kind-of": ">=6.0.3",
     "minimist": ">=1.2.2",
+    "set-value": ">=4.0.1",
     "ssri": ">=8.0.1",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
