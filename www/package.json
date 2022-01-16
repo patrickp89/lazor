@@ -27,6 +27,7 @@
     "hello-wasm-pack": "^0.1.0",
     "kind-of": ">=6.0.3",
     "minimist": ">=1.2.2",
+    "node-forge": ">=1.0.0",
     "set-value": ">=4.0.1",
     "ssri": ">=8.0.1",
     "url-parse": ">=1.5.2",
