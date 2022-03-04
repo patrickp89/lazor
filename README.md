@@ -31,6 +31,7 @@ $ wasm-pack build
 Start the Node.js sever, visit [localhost:8080](http://localhost:8080/), and click the "Render!" button:
 ```bash
 $ cd www/
+$ export NODE_OPTIONS=--openssl-legacy-provider
 $ npm run start
 ```
 
